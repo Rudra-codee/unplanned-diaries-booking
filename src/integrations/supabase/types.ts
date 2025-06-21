@@ -9,16 +9,190 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admins: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          created_at: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          number_of_guests: number
+          special_requests: string | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_amount: number
+          travel_date: string
+          trip_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          number_of_guests?: number
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_amount: number
+          travel_date: string
+          trip_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          number_of_guests?: number
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_amount?: number
+          travel_date?: string
+          trip_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          available_from: string | null
+          available_to: string | null
+          created_at: string | null
+          description: string | null
+          duration: number
+          id: string
+          image_url: string | null
+          location: string
+          max_guests: number | null
+          price: number
+          tags: string[] | null
+          title: string
+          type: Database["public"]["Enums"]["trip_type"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_from?: string | null
+          available_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration: number
+          id?: string
+          image_url?: string | null
+          location: string
+          max_guests?: number | null
+          price: number
+          tags?: string[] | null
+          title: string
+          type?: Database["public"]["Enums"]["trip_type"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_from?: string | null
+          available_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number
+          id?: string
+          image_url?: string | null
+          location?: string
+          max_guests?: number | null
+          price?: number
+          tags?: string[] | null
+          title?: string
+          type?: Database["public"]["Enums"]["trip_type"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_booking_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_bookings: number
+          pending_bookings: number
+          confirmed_bookings: number
+          total_revenue: number
+          total_guests: number
+        }[]
+      }
+      is_admin: {
+        Args: { user_id?: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      trip_type:
+        | "adventure"
+        | "cultural"
+        | "relaxation"
+        | "business"
+        | "family"
+        | "solo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +307,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      trip_type: [
+        "adventure",
+        "cultural",
+        "relaxation",
+        "business",
+        "family",
+        "solo",
+      ],
+    },
   },
 } as const

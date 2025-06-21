@@ -1,110 +1,138 @@
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTrips } from "@/hooks/useTrips";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Clock, Users } from "lucide-react";
 
-const destinations = [
-  {
-    id: 1,
-    name: "Spiti Valley",
-    subtitle: "Expedition",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    gradient: "from-orange-400 to-red-500"
-  },
-  {
-    id: 2,
-    name: "Discover Ladakh",
-    subtitle: "Adventure",
-    image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    gradient: "from-cyan-400 to-blue-500"
-  },
-  {
-    id: 3,
-    name: "Best of HIMACHAL",
-    subtitle: "Mountains",
-    image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    gradient: "from-emerald-400 to-teal-500"
-  },
-  {
-    id: 4,
-    name: "Uttrakhand",
-    subtitle: "Gems",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    gradient: "from-blue-500 to-purple-600"
+interface TrendingDestinationsProps {
+  onTripClick: (trip: any) => void;
+}
+
+const TrendingDestinations = ({ onTripClick }: TrendingDestinationsProps) => {
+  const { trips, loading, error } = useTrips();
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Trending <span className="text-emerald-500">Destinations</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="overflow-hidden hover:shadow-xl transition-shadow animate-pulse">
+                <div className="h-64 bg-gray-300"></div>
+                <CardContent className="p-6">
+                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-300 rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
   }
-];
 
-const TrendingDestinations = ({ onTripClick }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % destinations.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + destinations.length) % destinations.length);
-  };
+  if (error) {
+    return (
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Trending <span className="text-emerald-500">Destinations</span>
+          </h2>
+          <p className="text-red-600">Error loading destinations: {error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section id="destinations" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Trending <span className="relative">Destinations
-              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"></div>
-            </span>
+            Trending <span className="text-emerald-500">Destinations</span>
           </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Discover the most popular destinations loved by travelers around the world
+          </p>
         </div>
-        
-        <div className="relative">
-          <div className="flex gap-6 overflow-hidden">
-            <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentIndex * 25}%)` }}>
-              {destinations.map((destination) => (
-                <div
-                  key={destination.id}
-                  className="flex-none w-1/4 min-w-[300px] cursor-pointer group"
-                  onClick={() => onTripClick(destination)}
-                >
-                  <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${destination.gradient} opacity-80`} />
-                    <img
-                      src={destination.image}
-                      alt={destination.name}
-                      className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
-                    />
-                    <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                      <h3 className="text-2xl font-bold mb-2">{destination.name}</h3>
-                      <p className="text-lg opacity-90">{destination.subtitle}</p>
-                    </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {trips.slice(0, 6).map((trip) => (
+            <Card 
+              key={trip.id}
+              className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2"
+              onClick={() =>
+                onTripClick({
+                  id: trip.id,
+                  title: trip.title,
+                  location: trip.location,
+                  price: trip.price,
+                  description: trip.description,
+                  image: trip.image_url,
+                  tags: trip.tags,
+                  duration: trip.duration,
+                  max_guests: trip.max_guests,
+                })
+              }
+            >
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src={trip.image_url}
+                  alt={trip.title}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                />
+                <div className="absolute top-4 left-4">
+                  <Badge variant="secondary" className="bg-white/90 text-gray-800">
+                    {trip.type}
+                  </Badge>
+                </div>
+                <div className="absolute top-4 right-4">
+                  <Badge variant="secondary" className="bg-emerald-600 text-white">
+                    ${trip.price}
+                  </Badge>
+                </div>
+              </div>
+              
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2 text-gray-900">
+                  {trip.title}
+                </h3>
+                
+                <div className="flex items-center text-gray-600 mb-3">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span className="text-sm">{trip.location}</span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{trip.duration} days</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span>Max {trip.max_guests}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-900/20 hover:bg-gray-900/40 text-white p-3 rounded-full transition-all z-10"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-900/20 hover:bg-gray-900/40 text-white p-3 rounded-full transition-all z-10"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
-        
-        <div className="flex justify-center mt-8 space-x-2">
-          {destinations.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex ? "bg-emerald-500" : "bg-gray-300"
-              }`}
-            />
+
+                <p className="text-gray-600 mb-4 line-clamp-3">
+                  {trip.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1">
+                  {trip.tags.slice(0, 3).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

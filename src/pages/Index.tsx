@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import TrendingDestinations from "@/components/TrendingDestinations";
@@ -13,26 +15,34 @@ import MountainTreks from "@/components/MountainTreks";
 import Footer from "@/components/Footer";
 import TripModal from "@/components/TripModal";
 import BookingModal from "@/components/BookingModal";
+import { toast } from "sonner";
 
 const Index = () => {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingTrip, setBookingTrip] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleTripClick = (trip) => {
+  const handleTripClick = (trip: any) => {
     setSelectedTrip(trip);
   };
 
-  const handleBookNow = (trip) => {
+  const handleBookNow = (trip: any) => {
+    if (!user) {
+      toast.error("Please sign in to make a booking");
+      navigate("/auth");
+      return;
+    }
+    
     setBookingTrip(trip);
     setSelectedTrip(null);
     setShowBookingModal(true);
   };
 
-  const handleBookingSubmit = (bookingData) => {
+  const handleBookingSubmit = (bookingData: any) => {
     console.log("Booking submitted:", bookingData);
-    // Here we would integrate with Razorpay
-    alert("Redirecting to payment gateway...");
+    toast.success("Booking created successfully! Redirecting to payment...");
     setShowBookingModal(false);
   };
 

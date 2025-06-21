@@ -1,177 +1,259 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, CreditCard } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-const BookingModal = ({ trip, onClose, onSubmit }) => {
+interface BookingModalProps {
+  trip: any;
+  onClose: () => void;
+  onSubmit: (bookingData: any) => void;
+}
+
+const BookingModal = ({ trip, onClose, onSubmit }: BookingModalProps) => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    guests: "1",
+    guestName: "",
+    guestEmail: user?.email || "",
+    guestPhone: "",
+    numberOfGuests: 1,
     travelDate: "",
-    specialRequirements: ""
+    specialRequests: "",
   });
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "numberOfGuests" ? parseInt(value) || 1 : value
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      trip: trip.name,
-      price: trip.price
-    });
+    
+    if (!user) {
+      toast.error("Please sign in to make a booking");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const totalAmount = trip.price * formData.numberOfGuests;
+      
+      const bookingData = {
+        user_id: user.id,
+        trip_id: trip.id,
+        guest_name: formData.guestName,
+        guest_email: formData.guestEmail,
+        guest_phone: formData.guestPhone,
+        number_of_guests: formData.numberOfGuests,
+        travel_date: formData.travelDate,
+        total_amount: totalAmount,
+        special_requests: formData.specialRequests,
+        status: 'pending'
+      };
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([bookingData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Booking error:', error);
+        toast.error("Failed to create booking. Please try again.");
+        return;
+      }
+
+      toast.success("Booking created successfully!");
+      onSubmit(data);
+      onClose();
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!trip) return null;
+  if (!user) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Sign In Required</CardTitle>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              You need to sign in to make a booking.
+            </p>
+            <Button onClick={onClose} className="w-full">
+              Close
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <Dialog open={!!trip} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center justify-between">
-            Book Your Trip
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
-          <div className="bg-emerald-50 p-4 rounded-lg">
-            <h3 className="font-bold text-lg mb-2">{trip.name}</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">{trip.location} • {trip.duration}</span>
-              <span className="text-2xl font-bold text-emerald-600">{trip.price}</span>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Book Your Trip</CardTitle>
+              <CardDescription>
+                Complete your booking for {trip.title}
+              </CardDescription>
             </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
-          
+        </CardHeader>
+        
+        <CardContent>
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-semibold text-lg">{trip.title}</h3>
+            <p className="text-gray-600">{trip.location}</p>
+            <p className="text-emerald-600 font-bold">${trip.price} per person</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
+              <div>
+                <Label htmlFor="guestName">Full Name *</Label>
                 <Input
-                  id="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  id="guestName"
+                  name="guestName"
+                  value={formData.guestName}
+                  onChange={handleInputChange}
                   required
-                  placeholder="Enter your full name"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+              <div>
+                <Label htmlFor="guestEmail">Email *</Label>
                 <Input
-                  id="email"
+                  id="guestEmail"
+                  name="guestEmail"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  value={formData.guestEmail}
+                  onChange={handleInputChange}
                   required
-                  placeholder="Enter your email"
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
+              <div>
+                <Label htmlFor="guestPhone">Phone Number</Label>
                 <Input
-                  id="phone"
+                  id="guestPhone"
+                  name="guestPhone"
                   type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  required
-                  placeholder="Enter your phone number"
+                  value={formData.guestPhone}
+                  onChange={handleInputChange}
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="guests">Number of Guests *</Label>
-                <Select value={formData.guests} onValueChange={(value) => handleInputChange("guests",value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 Guest</SelectItem>
-                    <SelectItem value="2">2 Guests</SelectItem>
-                    <SelectItem value="3">3 Guests</SelectItem>
-                    <SelectItem value="4">4 Guests</SelectItem>
-                    <SelectItem value="5">5+ Guests</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div>
+                <Label htmlFor="numberOfGuests">Number of Guests *</Label>
+                <Input
+                  id="numberOfGuests"
+                  name="numberOfGuests"
+                  type="number"
+                  min="1"
+                  max={trip.max_guests || 10}
+                  value={formData.numberOfGuests}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="travelDate">Preferred Travel Date *</Label>
+
+            <div>
+              <Label htmlFor="travelDate">Travel Date *</Label>
               <Input
                 id="travelDate"
+                name="travelDate"
                 type="date"
                 value={formData.travelDate}
-                onChange={(e) => handleInputChange("travelDate", e.target.value)}
+                onChange={handleInputChange}
+                min={new Date().toISOString().split('T')[0]}
                 required
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="specialRequirements">Special Requirements</Label>
+
+            <div>
+              <Label htmlFor="specialRequests">Special Requests</Label>
               <Textarea
-                id="specialRequirements"
-                value={formData.specialRequirements}
-                onChange={(e) => handleInputChange("specialRequirements", e.target.value)}
-                placeholder="Any dietary restrictions, accessibility needs, or special requests..."
+                id="specialRequests"
+                name="specialRequests"
                 rows={3}
+                value={formData.specialRequests}
+                onChange={handleInputChange}
+                placeholder="Any special requirements or requests..."
               />
             </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Booking Summary</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Trip:</span>
-                  <span>{trip.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Guests:</span>
-                  <span>{formData.guests}</span>
-                </div>
-                <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Total:</span>
-                  <span className="text-emerald-600">{trip.price}</span>
-                </div>
+
+            <div className="bg-emerald-50 p-4 rounded-lg">
+              <div className="flex justify-between items-center text-lg font-semibold">
+                <span>Total Amount:</span>
+                <span className="text-emerald-600">
+                  ${(trip.price * formData.numberOfGuests).toFixed(2)}
+                </span>
               </div>
+              <p className="text-sm text-gray-600 mt-1">
+                {formData.numberOfGuests} guest{formData.numberOfGuests > 1 ? 's' : ''} × ${trip.price}
+              </p>
             </div>
-            
-            <div className="flex gap-4 pt-4">
+
+            <div className="flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1"
                 onClick={onClose}
+                className="flex-1"
+                disabled={loading}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white flex items-center gap-2"
+                className="flex-1"
+                disabled={loading}
               >
-                <CreditCard className="w-4 h-4" />
-                Proceed to Payment
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Book Now
               </Button>
             </div>
           </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
