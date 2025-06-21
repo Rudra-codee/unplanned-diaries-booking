@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
+
+type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
 interface BookingModalProps {
   trip: any;
@@ -59,7 +61,7 @@ const BookingModal = ({ trip, onClose, onSubmit }: BookingModalProps) => {
         travel_date: formData.travelDate,
         total_amount: totalAmount,
         special_requests: formData.specialRequests,
-        status: 'pending'
+        status: 'pending' as BookingStatus
       };
 
       const { data, error } = await supabase

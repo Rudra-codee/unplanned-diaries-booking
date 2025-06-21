@@ -24,31 +24,31 @@ export const useTrips = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('trips')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchTrips = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          setError(error.message);
-          console.error('Error fetching trips:', error);
-        } else {
-          setTrips(data || []);
-        }
-      } catch (err) {
-        setError('An unexpected error occurred');
-        console.error('Unexpected error:', err);
-      } finally {
-        setLoading(false);
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching trips:', error);
+      } else {
+        setTrips(data || []);
       }
-    };
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Unexpected error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTrips();
   }, []);
 
-  return { trips, loading, error, refetch: () => fetchTrips() };
+  return { trips, loading, error, refetch: fetchTrips };
 };
