@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Users, MapPin, Calendar, DollarSign, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import type { Database } from "@/integrations/supabase/types";
+
+type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
 interface AdminStats {
   total_users: number;
@@ -85,12 +87,30 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Load stats
-      const { data: statsData, error: statsError } = await supabase.rpc('get_admin_stats');
+      // Load booking stats using the correct function
+      const { data: bookingStatsData, error: statsError } = await supabase.rpc('get_booking_stats');
       if (statsError) {
-        console.error('Error loading stats:', statsError);
-      } else {
-        setStats(statsData[0]);
+        console.error('Error loading booking stats:', statsError);
+      } else if (bookingStatsData && bookingStatsData.length > 0) {
+        const bookingStats = bookingStatsData[0];
+        
+        // Get additional stats
+        const { count: userCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+          
+        const { count: tripCount } = await supabase
+          .from('trips')
+          .select('*', { count: 'exact', head: true });
+
+        setStats({
+          total_users: userCount || 0,
+          total_trips: tripCount || 0,
+          total_bookings: Number(bookingStats.total_bookings) || 0,
+          total_revenue: Number(bookingStats.total_revenue) || 0,
+          pending_bookings: Number(bookingStats.pending_bookings) || 0,
+          confirmed_bookings: Number(bookingStats.confirmed_bookings) || 0,
+        });
       }
 
       // Load recent bookings
@@ -128,7 +148,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
     try {
       const { error } = await supabase
         .from('bookings')
