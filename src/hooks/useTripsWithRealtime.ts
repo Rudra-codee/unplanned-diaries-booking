@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Trip } from './useTrips';
+import type { Database } from '@/integrations/supabase/types';
+
+type TripType = Database["public"]["Enums"]["trip_type"];
 
 export const useTripsWithRealtime = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -33,13 +36,28 @@ export const useTripsWithRealtime = () => {
 
   const createTrip = async (tripData: Omit<Trip, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Creating trip with data:', tripData);
+      
+      // Ensure the type is properly cast to the enum type
+      const processedData = {
+        ...tripData,
+        type: tripData.type as TripType,
+        available_from: tripData.available_from || new Date().toISOString().split('T')[0],
+        tags: tripData.tags || []
+      };
+
       const { data, error } = await supabase
         .from('trips')
-        .insert([tripData])
+        .insert([processedData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Trip created successfully:', data);
       return data;
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -49,14 +67,27 @@ export const useTripsWithRealtime = () => {
 
   const updateTrip = async (id: string, tripData: Partial<Trip>) => {
     try {
+      console.log('Updating trip with ID:', id, 'Data:', tripData);
+      
+      const updateData = {
+        ...tripData,
+        type: tripData.type as TripType,
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('trips')
-        .update({ ...tripData, updated_at: new Date().toISOString() })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Trip updated successfully:', data);
       return data;
     } catch (error) {
       console.error('Error updating trip:', error);
@@ -66,12 +97,19 @@ export const useTripsWithRealtime = () => {
 
   const deleteTrip = async (id: string) => {
     try {
+      console.log('Deleting trip with ID:', id);
+      
       const { error } = await supabase
         .from('trips')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Trip deleted successfully');
     } catch (error) {
       console.error('Error deleting trip:', error);
       throw error;

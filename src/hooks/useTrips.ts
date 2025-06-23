@@ -1,22 +1,23 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface Trip {
   id: string;
   title: string;
   location: string;
   price: number;
-  description: string;
-  image_url: string;
+  description: string | null;
+  image_url: string | null;
   tags: string[];
-  type: string;
+  type: Database["public"]["Enums"]["trip_type"];
   duration: number;
-  max_guests: number;
-  available_from: string;
-  available_to: string;
-  created_at: string;
-  updated_at: string;
+  max_guests: number | null;
+  available_from: string | null;
+  available_to: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export const useTrips = () => {

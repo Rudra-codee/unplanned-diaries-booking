@@ -13,6 +13,9 @@ import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Trip } from "@/hooks/useTrips";
+import type { Database } from "@/integrations/supabase/types";
+
+type TripType = Database["public"]["Enums"]["trip_type"];
 
 const tripSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -20,7 +23,7 @@ const tripSchema = z.object({
   price: z.number().min(0, "Price must be positive"),
   description: z.string().min(1, "Description is required"),
   image_url: z.string().url("Must be a valid URL"),
-  type: z.enum(["adventure", "cultural", "beach", "mountain", "wildlife", "cruise"]),
+  type: z.enum(["adventure", "cultural", "relaxation", "business", "family", "solo"]),
   duration: z.number().min(1, "Duration must be at least 1 day"),
   max_guests: z.number().min(1, "Max guests must be at least 1"),
   available_from: z.string(),
@@ -48,7 +51,7 @@ export const TripForm = ({ trip, onSubmit, onCancel, isLoading }: TripFormProps)
       price: trip?.price || 0,
       description: trip?.description || "",
       image_url: trip?.image_url || "",
-      type: trip?.type as any || "adventure",
+      type: (trip?.type as any) || "adventure",
       duration: trip?.duration || 1,
       max_guests: trip?.max_guests || 10,
       available_from: trip?.available_from || new Date().toISOString().split('T')[0],
@@ -57,6 +60,7 @@ export const TripForm = ({ trip, onSubmit, onCancel, isLoading }: TripFormProps)
   });
 
   const handleSubmit = async (data: TripFormData) => {
+    console.log('Form submitted with data:', data);
     await onSubmit({ ...data, tags });
   };
 
@@ -137,10 +141,10 @@ export const TripForm = ({ trip, onSubmit, onCancel, isLoading }: TripFormProps)
                   <SelectContent>
                     <SelectItem value="adventure">Adventure</SelectItem>
                     <SelectItem value="cultural">Cultural</SelectItem>
-                    <SelectItem value="beach">Beach</SelectItem>
-                    <SelectItem value="mountain">Mountain</SelectItem>
-                    <SelectItem value="wildlife">Wildlife</SelectItem>
-                    <SelectItem value="cruise">Cruise</SelectItem>
+                    <SelectItem value="relaxation">Relaxation</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="family">Family</SelectItem>
+                    <SelectItem value="solo">Solo</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
