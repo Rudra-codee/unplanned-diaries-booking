@@ -1,5 +1,5 @@
 
-import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
+import { useTripsContext } from "@/contexts/TripsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Users } from "lucide-react";
@@ -9,7 +9,7 @@ interface TrendingDestinationsProps {
 }
 
 const TrendingDestinations = ({ onTripClick }: TrendingDestinationsProps) => {
-  const { trips, loading, error } = useTripsWithRealtime();
+  const { trips, loading, error } = useTripsContext();
 
   // Filter trips for trending section
   const trendingTrips = trips.filter(trip => trip.section === 'trending');

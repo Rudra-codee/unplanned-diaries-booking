@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { TripModal } from "@/components/admin/TripModal";
-import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
+import { useTripsContext } from "@/contexts/TripsContext";
 import type { Database } from "@/integrations/supabase/types";
 import type { Trip } from "@/hooks/useTrips";
 
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sectionFilter, setSectionFilter] = useState<string>("all");
 
-  const { trips, loading: tripsLoading, createTrip, updateTrip, deleteTrip } = useTripsWithRealtime();
+  const { trips, loading: tripsLoading, createTrip, updateTrip, deleteTrip } = useTripsContext();
 
   // Filter trips based on selected section
   const filteredTrips = sectionFilter === "all" 

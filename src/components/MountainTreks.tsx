@@ -1,10 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
-import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
+import { useTripsContext } from "@/contexts/TripsContext";
 
 const MountainTreks = ({ onTripClick }) => {
-  const { trips, loading, error } = useTripsWithRealtime();
+  const { trips, loading, error } = useTripsContext();
 
   // Filter trips for mountain section
   const mountainTrips = trips.filter(trip => trip.section === 'mountain');
