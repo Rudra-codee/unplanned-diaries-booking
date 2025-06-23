@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Users, MapPin, Calendar, DollarSign, Loader2 } from "lucide-react";
+import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { TripModal } from "@/components/admin/TripModal";
+import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
 import type { Database } from "@/integrations/supabase/types";
+import type { Trip } from "@/hooks/useTrips";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -45,7 +49,11 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [trips, setTrips] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { trips, loading: tripsLoading, createTrip, updateTrip, deleteTrip } = useTripsWithRealtime();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -131,18 +139,6 @@ const AdminDashboard = () => {
       } else {
         setBookings(bookingsData || []);
       }
-
-      // Load trips
-      const { data: tripsData, error: tripsError } = await supabase
-        .from('trips')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (tripsError) {
-        console.error('Error loading trips:', tripsError);
-      } else {
-        setTrips(tripsData || []);
-      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -167,6 +163,47 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateTrip = () => {
+    setSelectedTrip(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditTrip = (trip: Trip) => {
+    setSelectedTrip(trip);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteTrip = async (tripId: string) => {
+    if (!confirm("Are you sure you want to delete this trip? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      await deleteTrip(tripId);
+      toast.success("Trip deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete trip");
+    }
+  };
+
+  const handleTripSubmit = async (data: any) => {
+    setIsSubmitting(true);
+    try {
+      if (selectedTrip) {
+        await updateTrip(selectedTrip.id, data);
+        toast.success("Trip updated successfully");
+      } else {
+        await createTrip(data);
+        toast.success("Trip created successfully");
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error(`Failed to ${selectedTrip ? 'update' : 'create'} trip`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -186,7 +223,7 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage your travel business</p>
+          <p className="text-gray-600">Manage your travel business with real-time updates</p>
         </div>
 
         {/* Stats Cards */}
@@ -239,12 +276,90 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="bookings" className="space-y-6">
+        <Tabs defaultValue="trips" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
             <TabsTrigger value="trips">Manage Trips</TabsTrigger>
+            <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="trips">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Trip Management</CardTitle>
+                    <CardDescription>
+                      Create, edit, and manage all trips with real-time synchronization
+                    </CardDescription>
+                  </div>
+                  <Button onClick={handleCreateTrip} className="bg-emerald-600 hover:bg-emerald-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Trip
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {tripsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {trips.map((trip) => (
+                      <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <img
+                            src={trip.image_url}
+                            alt={trip.title}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{trip.title}</h3>
+                            <p className="text-sm text-gray-600 flex items-center">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              {trip.location}
+                            </p>
+                            <div className="flex items-center gap-4 mt-1">
+                              <span className="text-sm text-gray-500">${trip.price}</span>
+                              <span className="text-sm text-gray-500">{trip.duration} days</span>
+                              <span className="text-sm text-gray-500">Max {trip.max_guests} guests</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {trip.type}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditTrip(trip)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteTrip(trip.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {trips.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        No trips found. Create your first trip to get started.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="bookings">
             <Card>
@@ -321,34 +436,6 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="trips">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Trips</CardTitle>
-                <CardDescription>
-                  View and manage all available trips
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  {trips.map((trip: any) => (
-                    <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{trip.title}</h3>
-                        <p className="text-sm text-gray-600">{trip.location}</p>
-                        <p className="text-sm text-gray-500">${trip.price} • {trip.duration} days</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="outline">{trip.type}</Badge>
-                        <Button size="sm" variant="outline">Edit</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="users">
             <Card>
               <CardHeader>
@@ -366,6 +453,14 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <TripModal
+        trip={selectedTrip}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleTripSubmit}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 };
