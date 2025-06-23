@@ -47,6 +47,7 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
         setError(error.message);
         console.error('Error fetching trips:', error);
       } else {
+        console.log('Fetched trips:', data);
         setTrips(data || []);
         setError(null);
       }
@@ -83,6 +84,8 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip created successfully:', data);
+      // Manually add the new trip to the local state for immediate UI update
+      setTrips(prev => [data, ...prev]);
       return data;
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -113,6 +116,8 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip updated successfully:', data);
+      // Manually update the trip in local state
+      setTrips(prev => prev.map(trip => trip.id === id ? data : trip));
       return data;
     } catch (error) {
       console.error('Error updating trip:', error);
@@ -135,6 +140,8 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip deleted successfully');
+      // Manually remove the trip from local state
+      setTrips(prev => prev.filter(trip => trip.id !== id));
     } catch (error) {
       console.error('Error deleting trip:', error);
       throw error;
@@ -144,9 +151,10 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
   useEffect(() => {
     fetchTrips();
 
-    // Set up real-time subscription - only once in the provider
+    // Set up real-time subscription with proper cleanup
+    console.log('Setting up real-time subscription for trips');
     const channel = supabase
-      .channel('trips-changes')
+      .channel('trips-realtime-changes')
       .on(
         'postgres_changes',
         {
@@ -155,10 +163,17 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
           table: 'trips'
         },
         (payload) => {
-          console.log('Real-time update:', payload);
+          console.log('Real-time update received:', payload);
           
           if (payload.eventType === 'INSERT') {
-            setTrips(prev => [payload.new as Trip, ...prev]);
+            setTrips(prev => {
+              // Check if trip already exists to avoid duplicates
+              const exists = prev.some(trip => trip.id === payload.new.id);
+              if (!exists) {
+                return [payload.new as Trip, ...prev];
+              }
+              return prev;
+            });
           } else if (payload.eventType === 'UPDATE') {
             setTrips(prev => prev.map(trip => 
               trip.id === payload.new.id ? payload.new as Trip : trip
@@ -168,9 +183,12 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up trips subscription');
       supabase.removeChannel(channel);
     };
   }, []);

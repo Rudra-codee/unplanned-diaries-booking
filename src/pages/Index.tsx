@@ -51,7 +51,7 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <TrendingDestinations onTripClick={handleTripClick} />
-      <UpcomingTrips />
+      <UpcomingTrips onTripClick={handleTripClick} />
       <TourPackages onTripClick={handleTripClick} />
       <MountainTreks onTripClick={handleTripClick} />
       <BookingForm />
