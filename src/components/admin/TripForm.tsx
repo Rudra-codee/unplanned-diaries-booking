@@ -28,6 +28,7 @@ const tripSchema = z.object({
   max_guests: z.number().min(1, "Max guests must be at least 1"),
   available_from: z.string(),
   available_to: z.string().optional(),
+  section: z.enum(["trending", "upcoming", "mountain", "packages"]),
 });
 
 type TripFormData = z.infer<typeof tripSchema>;
@@ -56,6 +57,7 @@ export const TripForm = ({ trip, onSubmit, onCancel, isLoading }: TripFormProps)
       max_guests: trip?.max_guests || 10,
       available_from: trip?.available_from || new Date().toISOString().split('T')[0],
       available_to: trip?.available_to || "",
+      section: (trip?.section as any) || "trending",
     },
   });
 
@@ -145,6 +147,30 @@ export const TripForm = ({ trip, onSubmit, onCancel, isLoading }: TripFormProps)
                     <SelectItem value="business">Business</SelectItem>
                     <SelectItem value="family">Family</SelectItem>
                     <SelectItem value="solo">Solo</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="section"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Section</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select section" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="trending">Trending Destinations</SelectItem>
+                    <SelectItem value="upcoming">Upcoming Trips</SelectItem>
+                    <SelectItem value="mountain">Mountain Treks</SelectItem>
+                    <SelectItem value="packages">Tour Packages</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

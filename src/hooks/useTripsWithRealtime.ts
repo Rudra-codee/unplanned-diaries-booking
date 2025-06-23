@@ -43,7 +43,9 @@ export const useTripsWithRealtime = () => {
         ...tripData,
         type: tripData.type as TripType,
         available_from: tripData.available_from || new Date().toISOString().split('T')[0],
-        tags: tripData.tags || []
+        tags: tripData.tags || [],
+        section: tripData.section || 'trending',
+        itinerary: tripData.itinerary || []
       };
 
       const { data, error } = await supabase

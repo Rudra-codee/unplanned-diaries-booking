@@ -11,6 +11,9 @@ interface TrendingDestinationsProps {
 const TrendingDestinations = ({ onTripClick }: TrendingDestinationsProps) => {
   const { trips, loading, error } = useTripsWithRealtime();
 
+  // Filter trips for trending section
+  const trendingTrips = trips.filter(trip => trip.section === 'trending');
+
   if (loading) {
     return (
       <section className="py-20 bg-gray-50">
@@ -63,7 +66,7 @@ const TrendingDestinations = ({ onTripClick }: TrendingDestinationsProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {trips.slice(0, 6).map((trip) => (
+          {trendingTrips.slice(0, 6).map((trip) => (
             <Card 
               key={trip.id}
               className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2"
@@ -135,6 +138,12 @@ const TrendingDestinations = ({ onTripClick }: TrendingDestinationsProps) => {
             </Card>
           ))}
         </div>
+
+        {trendingTrips.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No trending destinations available at the moment.
+          </div>
+        )}
       </div>
     </section>
   );

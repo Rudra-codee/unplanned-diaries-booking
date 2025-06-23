@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2 } from "lucide-react";
+import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { TripModal } from "@/components/admin/TripModal";
 import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
@@ -52,8 +53,24 @@ const AdminDashboard = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sectionFilter, setSectionFilter] = useState<string>("all");
 
   const { trips, loading: tripsLoading, createTrip, updateTrip, deleteTrip } = useTripsWithRealtime();
+
+  // Filter trips based on selected section
+  const filteredTrips = sectionFilter === "all" 
+    ? trips 
+    : trips.filter(trip => trip.section === sectionFilter);
+
+  const getSectionDisplayName = (section: string) => {
+    switch (section) {
+      case 'trending': return 'Trending Destinations';
+      case 'upcoming': return 'Upcoming Trips';
+      case 'mountain': return 'Mountain Treks';
+      case 'packages': return 'Tour Packages';
+      default: return section;
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -290,7 +307,7 @@ const AdminDashboard = () => {
                   <div>
                     <CardTitle>Trip Management</CardTitle>
                     <CardDescription>
-                      Create, edit, and manage all trips with real-time synchronization
+                      Create, edit, and manage all trips with section assignment and real-time synchronization
                     </CardDescription>
                   </div>
                   <Button onClick={handleCreateTrip} className="bg-emerald-600 hover:bg-emerald-700">
@@ -300,13 +317,33 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Section Filter */}
+                <div className="mb-6 flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <Select value={sectionFilter} onValueChange={setSectionFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by section" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sections</SelectItem>
+                      <SelectItem value="trending">Trending Destinations</SelectItem>
+                      <SelectItem value="upcoming">Upcoming Trips</SelectItem>
+                      <SelectItem value="mountain">Mountain Treks</SelectItem>
+                      <SelectItem value="packages">Tour Packages</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-gray-500">
+                    Showing {filteredTrips.length} trip{filteredTrips.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+
                 {tripsLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {trips.map((trip) => (
+                    {filteredTrips.map((trip) => (
                       <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="flex items-center space-x-4">
                           <img
@@ -328,6 +365,9 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {getSectionDisplayName(trip.section)}
+                          </Badge>
                           <Badge variant="outline" className="text-xs">
                             {trip.type}
                           </Badge>
@@ -350,9 +390,12 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                     ))}
-                    {trips.length === 0 && (
+                    {filteredTrips.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        No trips found. Create your first trip to get started.
+                        {sectionFilter === "all" 
+                          ? "No trips found. Create your first trip to get started."
+                          : `No trips found in the ${getSectionDisplayName(sectionFilter)} section.`
+                        }
                       </div>
                     )}
                   </div>

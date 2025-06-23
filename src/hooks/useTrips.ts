@@ -16,6 +16,8 @@ export interface Trip {
   max_guests: number | null;
   available_from: string | null;
   available_to: string | null;
+  section: string;
+  itinerary: any | null;
   created_at: string | null;
   updated_at: string | null;
 }

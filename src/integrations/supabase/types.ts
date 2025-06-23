@@ -122,9 +122,11 @@ export type Database = {
           duration: number
           id: string
           image_url: string | null
+          itinerary: Json | null
           location: string
           max_guests: number | null
           price: number
+          section: string
           tags: string[] | null
           title: string
           type: Database["public"]["Enums"]["trip_type"] | null
@@ -138,9 +140,11 @@ export type Database = {
           duration: number
           id?: string
           image_url?: string | null
+          itinerary?: Json | null
           location: string
           max_guests?: number | null
           price: number
+          section?: string
           tags?: string[] | null
           title: string
           type?: Database["public"]["Enums"]["trip_type"] | null
@@ -154,9 +158,11 @@ export type Database = {
           duration?: number
           id?: string
           image_url?: string | null
+          itinerary?: Json | null
           location?: string
           max_guests?: number | null
           price?: number
+          section?: string
           tags?: string[] | null
           title?: string
           type?: Database["public"]["Enums"]["trip_type"] | null
