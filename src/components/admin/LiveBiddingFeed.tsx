@@ -66,17 +66,14 @@ const LiveBiddingFeed = () => {
   const fetchSecretTrips = async () => {
     try {
       const { data, error } = await supabase
-        .from('secret_trips')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .rpc('get_all_secret_trips');
 
       if (error) {
         console.error('Error fetching secret trips:', error);
         return;
       }
 
-      setSecretTrips(data || []);
+      setSecretTrips((data || []) as SecretTrip[]);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -85,16 +82,14 @@ const LiveBiddingFeed = () => {
   const fetchBids = async () => {
     try {
       const { data, error } = await supabase
-        .from('bids')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .rpc('get_all_bids');
 
       if (error) {
         console.error('Error fetching bids:', error);
         return;
       }
 
-      setBids(data || []);
+      setBids((data || []) as Bid[]);
     } catch (error) {
       console.error('Error:', error);
     } finally {

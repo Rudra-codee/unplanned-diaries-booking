@@ -79,18 +79,16 @@ const SecretLocationTrip = () => {
   const fetchSecretTrip = async () => {
     try {
       const { data, error } = await supabase
-        .from('secret_trips')
-        .select('*')
-        .eq('is_active', true)
-        .gt('end_date', new Date().toISOString())
-        .single();
+        .rpc('get_active_secret_trip');
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching secret trip:', error);
         return;
       }
 
-      setSecretTrip(data);
+      if (data && data.length > 0) {
+        setSecretTrip(data[0] as SecretTrip);
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -101,18 +99,14 @@ const SecretLocationTrip = () => {
   const fetchBids = async (tripId: string) => {
     try {
       const { data, error } = await supabase
-        .from('bids')
-        .select('*')
-        .eq('secret_trip_id', tripId)
-        .order('bid_amount', { ascending: false })
-        .limit(3);
+        .rpc('get_trip_bids', { trip_id: tripId });
 
       if (error) {
         console.error('Error fetching bids:', error);
         return;
       }
 
-      setBids(data || []);
+      setBids((data || []) as Bid[]);
       setHighestBid(data && data.length > 0 ? data[0].bid_amount : 0);
     } catch (error) {
       console.error('Error:', error);
@@ -160,9 +154,8 @@ const SecretLocationTrip = () => {
         .single();
 
       const { error } = await supabase
-        .from('bids')
-        .upsert({
-          secret_trip_id: secretTrip!.id,
+        .rpc('place_bid', {
+          trip_id: secretTrip!.id,
           user_id: user.id,
           bid_amount: amount,
           user_name: profile?.full_name || 'Anonymous',

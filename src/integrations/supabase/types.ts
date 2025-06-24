@@ -30,6 +30,47 @@ export type Database = {
         }
         Relationships: []
       }
+      bids: {
+        Row: {
+          bid_amount: number
+          created_at: string | null
+          id: string
+          secret_trip_id: string | null
+          updated_at: string | null
+          user_email: string
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          bid_amount: number
+          created_at?: string | null
+          id?: string
+          secret_trip_id?: string | null
+          updated_at?: string | null
+          user_email: string
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          bid_amount?: number
+          created_at?: string | null
+          id?: string
+          secret_trip_id?: string | null
+          updated_at?: string | null
+          user_email?: string
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_secret_trip_id_fkey"
+            columns: ["secret_trip_id"]
+            isOneToOne: false
+            referencedRelation: "secret_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           created_at: string | null
@@ -109,6 +150,48 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      secret_trips: {
+        Row: {
+          available_seats: number
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          max_guests: number
+          start_date: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats?: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          max_guests?: number
+          start_date: string
+          title?: string
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          max_guests?: number
+          start_date?: string
+          title?: string
           updated_at?: string | null
         }
         Relationships: []
