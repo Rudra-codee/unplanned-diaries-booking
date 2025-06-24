@@ -1,267 +1,202 @@
 
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, MapPin, Play } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Play, MapPin } from "lucide-react";
 
 const destinations = [
   {
     id: 1,
-    location: "Swiss Alps, Switzerland",
-    title: "Your Next Adventure Awaits!",
-    description: "We're not a travel agency. We're the ones who are here to transform lives through travel! It's good for health, you know like, yoga?",
+    location: "LOCATION, STATE",
+    title: "The Journey Beyond Your Imaginary",
+    description: "Discover thousands of beautiful places around the world with wonderful experiences you can imagine.",
     image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    highlights: [
-      { label: "Excellence", description: "Striving for exceptional quality in every aspect of our service." },
-      { label: "Sustainable", description: "Promoting responsible travel practices for a greener future." }
-    ]
+    cardImage1: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation1: "The Location Name",
+    cardCountry1: "Country",
+    cardImage2: "https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation2: "The Location",
+    cardCountry2: "Country"
   },
   {
     id: 2,
-    location: "Santorini, Greece",
-    title: "Transform Your Life Through Travel",
-    description: "Experience the breathtaking beauty of white-washed buildings overlooking azure waters in this iconic Greek island.",
-    image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    highlights: [
-      { label: "Cultural", description: "Immerse yourself in rich history and local traditions." },
-      { label: "Luxury", description: "Premium accommodations with world-class amenities." }
-    ]
+    location: "SWITZERLAND",
+    title: "Alpine Adventures Await",
+    description: "Experience breathtaking mountain views and pristine lakes in the heart of the Swiss Alps.",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+    cardImage1: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation1: "Matterhorn Valley",
+    cardCountry1: "Switzerland",
+    cardImage2: "https://images.unsplash.com/photo-1510672734144-2b4ba0c2de2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation2: "Lake Geneva",
+    cardCountry2: "Switzerland"
   },
   {
     id: 3,
-    location: "Bali, Indonesia",
-    title: "Enjoy Your Travel With Us",
-    description: "Find your zen in this tropical paradise where ancient temples meet pristine beaches and lush rice terraces.",
-    image: "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    highlights: [
-      { label: "Adventure", description: "Thrilling activities from volcano hiking to water sports." },
-      { label: "Wellness", description: "Rejuvenate your mind, body and soul in nature's embrace." }
-    ]
+    location: "HIMALAYAS, NEPAL",
+    title: "Mountain Peaks Beyond Dreams",
+    description: "Journey through the world's highest mountains and discover the beauty of the Himalayas.",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+    cardImage1: "https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation1: "Everest Base Camp",
+    cardCountry1: "Nepal",
+    cardImage2: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    cardLocation2: "Annapurna Circuit",
+    cardCountry2: "Nepal"
   }
 ];
 
 const HeroSection = () => {
-  const [currentDestination, setCurrentDestination] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Auto-slide functionality
   useEffect(() => {
     const interval = setInterval(() => {
-      nextDestination();
-    }, 8000);
+      setCurrentSlide((prev) => (prev + 1) % destinations.length);
+    }, 5000); // Change slide every 5 seconds
 
     return () => clearInterval(interval);
-  }, [currentDestination]);
+  }, []);
 
-  const nextDestination = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentDestination((prev) => (prev + 1) % destinations.length);
-      setIsTransitioning(false);
-    }, 300);
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % destinations.length);
   };
 
-  const prevDestination = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentDestination((prev) => (prev - 1 + destinations.length) % destinations.length);
-      setIsTransitioning(false);
-    }, 300);
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + destinations.length) % destinations.length);
   };
-
-  const goToDestination = (index: number) => {
-    if (isTransitioning || index === currentDestination) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentDestination(index);
-      setIsTransitioning(false);
-    }, 300);
-  };
-
-  const handleExploreClick = () => {
-    document.getElementById('destinations')?.scrollIntoView({ behavior: 'smooth' });
-    console.log('Explore Now clicked');
-  };
-
-  const handlePlayVideo = () => {
-    // Open a video modal or redirect to video
-    alert('Video functionality would be implemented here - opening travel video!');
-    console.log('Play video clicked');
-  };
-
-  const current = destinations[currentDestination];
 
   return (
-    <section id="home" className="relative h-screen w-full overflow-hidden pt-16 lg:pt-20">
-      {/* Background Images with Smooth Transition */}
-      {destinations.map((destination, index) => (
+    <div className="relative h-screen flex items-center justify-center overflow-hidden">
+      {destinations.map((dest, index) => (
         <div
-          key={destination.id}
-          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out ${
-            index === currentDestination 
-              ? 'opacity-100 scale-100' 
-              : 'opacity-0 scale-105'
+          key={dest.id}
+          className={`absolute inset-0 transition-all duration-1000 ${
+            index === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-105"
           }`}
-          style={{
-            backgroundImage: `url(${destination.image})`,
-          }}
-        />
-      ))}
-
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40" />
-
-      {/* Main Content */}
-      <div className="relative z-10 h-full flex items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-8 items-center">
-          {/* Left Content */}
-          <div className={`space-y-4 sm:space-y-6 max-w-none transition-all duration-700 ${isTransitioning ? 'opacity-0 translate-x-[-20px]' : 'opacity-100 translate-x-0'}`}>
-            <div className="flex items-center space-x-2 text-white/80">
-              <MapPin size={16} className="flex-shrink-0" />
-              <span className="text-xs sm:text-sm uppercase tracking-wider truncate">{current.location}</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight break-words">
-              {current.title}
-            </h1>
-
-            <p className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed max-w-lg">
-              {current.description}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button 
-                onClick={handleExploreClick}
-                className="bg-white text-gray-900 px-6 py-3 rounded-full font-semibold hover:bg-white/90 transition-all duration-300 transform hover:scale-105 text-center text-sm sm:text-base"
-              >
-                Explore Now
-              </button>
-              <button 
-                onClick={handlePlayVideo}
-                className="flex items-center justify-center space-x-3 text-white hover:text-white/80 transition-colors min-w-0"
-              >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300 flex-shrink-0">
-                  <Play size={14} fill="white" />
-                </div>
-                <span className="font-medium text-sm sm:text-base truncate">Play the video</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Right Content - Destination Cards - Hidden on mobile and tablet */}
-          <div className="hidden xl:flex justify-end">
-            <div className="relative max-w-sm">
-              {/* Main Destination Card */}
-              <div className={`w-72 h-80 rounded-2xl overflow-hidden bg-cover bg-center transition-all duration-700 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-                   style={{ backgroundImage: `url(${current.image})` }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <MapPin size={14} />
-                    <span className="text-sm">{current.location.split(',')[0]}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold">{current.location.split(',')[1]}</h3>
-                </div>
-              </div>
-
-              {/* Navigation Arrows */}
-              <button 
-                onClick={prevDestination}
-                className="absolute left-[-20px] top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button 
-                onClick={nextDestination}
-                className="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300"
-              >
-                <ChevronRight size={20} />
-              </button>
-
-              {/* Thumbnail Navigation */}
-              <div className="absolute right-[-60px] top-1/2 transform -translate-y-1/2 flex flex-col space-y-3">
-                {destinations.map((dest, index) => (
-                  <button
-                    key={dest.id}
-                    onClick={() => goToDestination(index)}
-                    className={`w-12 h-16 rounded-lg overflow-hidden transition-all duration-300 ${
-                      index === currentDestination 
-                        ? 'ring-2 ring-white scale-110' 
-                        : 'opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img 
-                      src={dest.image} 
-                      alt={dest.location}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.log(`Failed to load image: ${dest.image}`);
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Content */}
-      <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 z-10 overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-            {/* Highlights */}
-            {current.highlights.map((highlight, index) => (
-              <div 
-                key={highlight.label}
-                className={`bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 text-white transition-all duration-700 min-w-0 ${
-                  isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <h4 className="font-semibold mb-2 text-sm sm:text-base truncate">{highlight.label}</h4>
-                <p className="text-xs sm:text-sm text-white/80 line-clamp-2">{highlight.description}</p>
-              </div>
-            ))}
-
-            {/* Social Links */}
-            <div className="hidden lg:flex items-center justify-end space-x-3">
-              {[
-                { name: 'ig', url: 'https://instagram.com/unplanneddiaries' },
-                { name: 'fb', url: 'https://facebook.com/unplanneddiaries' },
-                { name: 'tw', url: 'https://twitter.com/unplanneddiaries' },
-                { name: 'in', url: 'https://linkedin.com/company/unplanneddiaries' }
-              ].map((social) => (
-                <a 
-                  key={social.name}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all duration-300 text-xs font-medium flex-shrink-0"
-                >
-                  {social.name}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Destination Indicators */}
-      <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
-        {destinations.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToDestination(index)}
-            className={`w-6 sm:w-8 h-1 rounded-full transition-all duration-300 ${
-              index === currentDestination 
-                ? 'bg-white' 
-                : 'bg-white/30 hover:bg-white/50'
-            }`}
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${dest.image})` }}
           />
-        ))}
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+      ))}
+      
+      <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto px-4">
+        {/* Left Content */}
+        <div className="flex-1 text-white max-w-2xl">
+          <div className="flex items-center mb-6">
+            <MapPin className="w-5 h-5 mr-2" />
+            <span className="text-lg font-medium tracking-wider">
+              {destinations[currentSlide].location}
+            </span>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            {destinations[currentSlide].title}
+          </h1>
+          
+          <p className="text-xl mb-8 opacity-90 leading-relaxed">
+            {destinations[currentSlide].description}
+          </p>
+          
+          <div className="flex items-center space-x-6">
+            <Button className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-none text-lg font-medium">
+              Explore Now
+            </Button>
+            <Button variant="ghost" className="text-white hover:bg-white/10 px-8 py-3 rounded-none text-lg font-medium flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center">
+                <Play className="w-5 h-5 ml-1" />
+              </div>
+              Play the video
+            </Button>
+          </div>
+
+          {/* Bottom Values */}
+          <div className="flex items-center space-x-12 mt-16">
+            <div>
+              <h3 className="text-xl font-bold mb-2">Excellence</h3>
+              <p className="text-sm opacity-80 max-w-xs">
+                Striving for exceptional quality in every aspect of our service.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">Sustainable</h3>
+              <p className="text-sm opacity-80 max-w-xs">
+                Promoting responsible travel practices for a greener future.
+              </p>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="flex items-center space-x-4 mt-8">
+            <span className="text-sm opacity-80">Follow us:</span>
+            <a href="#" className="text-white hover:text-emerald-300 transition-colors">ig</a>
+            <a href="#" className="text-white hover:text-emerald-300 transition-colors">fb</a>
+            <a href="#" className="text-white hover:text-emerald-300 transition-colors">tw</a>
+            <a href="#" className="text-white hover:text-emerald-300 transition-colors">in</a>
+          </div>
+        </div>
+        
+        {/* Right Side Cards */}
+        <div className="hidden lg:flex flex-col space-y-4 relative">
+          <div className="w-80 h-64 rounded-2xl overflow-hidden relative group cursor-pointer">
+            <img
+              src={destinations[currentSlide].cardImage1}
+              alt={destinations[currentSlide].cardLocation1}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-4 left-4 text-white">
+              <div className="flex items-center mb-1">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">{destinations[currentSlide].cardLocation1}</span>
+              </div>
+              <span className="text-xs opacity-80">{destinations[currentSlide].cardCountry1}</span>
+            </div>
+          </div>
+          
+          <div className="w-80 h-64 rounded-2xl overflow-hidden relative group cursor-pointer">
+            <img
+              src={destinations[currentSlide].cardImage2}
+              alt={destinations[currentSlide].cardLocation2}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-4 left-4 text-white">
+              <div className="flex items-center mb-1">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">{destinations[currentSlide].cardLocation2}</span>
+              </div>
+              <span className="text-xs opacity-80">{destinations[currentSlide].cardCountry2}</span>
+            </div>
+          </div>
+          
+          {/* Navigation Arrow */}
+          <button
+            onClick={nextSlide}
+            className="absolute -right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700" />
+          </button>
+        </div>
       </div>
-    </section>
+      
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      
+      <button
+        onClick={nextSlide}
+        className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors lg:hidden"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+    </div>
   );
 };
 
