@@ -51,28 +51,28 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="fixed top-0 w-full z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-emerald-600">
-              WanderLust
+            <Link to="/" className="text-2xl font-bold text-white">
+              Unplanned Diaries
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-emerald-600 transition-colors">
-              Home
-            </Link>
-            <a href="#destinations" className="text-gray-700 hover:text-emerald-600 transition-colors">
+            <a href="#destinations" className="text-white hover:text-emerald-300 transition-colors">
               Destinations
             </a>
-            <a href="#packages" className="text-gray-700 hover:text-emerald-600 transition-colors">
-              Packages
+            <a href="#group-trips" className="text-white hover:text-emerald-300 transition-colors">
+              Group Trips
             </a>
-            <a href="#about" className="text-gray-700 hover:text-emerald-600 transition-colors">
-              About
+            <a href="#packages" className="text-white hover:text-emerald-300 transition-colors">
+              Tour Packages
+            </a>
+            <a href="#contact" className="text-white hover:text-emerald-300 transition-colors">
+              Contact
             </a>
 
             {/* Authentication Section */}
@@ -89,7 +89,7 @@ const Navbar = () => {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
                       <p className="font-medium">{user.email}</p>
@@ -116,11 +116,18 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/auth">
-                <Button variant="outline" className="text-emerald-600 border-emerald-600 hover:bg-emerald-50">
-                  Sign In
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link to="/auth">
+                  <Button className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button className="bg-emerald-500 text-white hover:bg-emerald-600 px-6 py-2 rounded-full">
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -128,7 +135,7 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-emerald-600 focus:outline-none focus:text-emerald-600"
+              className="text-white hover:text-emerald-300 focus:outline-none focus:text-emerald-300"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -137,48 +144,48 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                to="/"
-                className="block px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Home
-              </Link>
+          <div className="md:hidden bg-white/20 backdrop-blur-md rounded-lg mt-2 p-4">
+            <div className="space-y-3">
               <a
                 href="#destinations"
-                className="block px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Destinations
               </a>
               <a
-                href="#packages"
-                className="block px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                href="#group-trips"
+                className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Packages
+                Group Trips
               </a>
               <a
-                href="#about"
-                className="block px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                href="#packages"
+                className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                About
+                Tour Packages
+              </a>
+              <a
+                href="#contact"
+                className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Contact
               </a>
               
               {/* Mobile Authentication */}
-              <div className="border-t border-gray-200 pt-4 pb-3">
+              <div className="border-t border-white/20 pt-4 space-y-2">
                 {user ? (
                   <div className="space-y-2">
-                    <div className="px-3 py-2 text-sm text-gray-500">
+                    <div className="px-3 py-2 text-sm text-white/80">
                       Signed in as {user.email}
                     </div>
                     {isAdmin && (
                       <Link
                         to="/admin"
-                        className="block px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                        className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                         onClick={() => setIsOpen(false)}
                       >
                         Admin Dashboard
@@ -186,19 +193,28 @@ const Navbar = () => {
                     )}
                     <button
                       onClick={handleSignOut}
-                      className="block w-full text-left px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                      className="block w-full text-left px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                     >
                       Sign Out
                     </button>
                   </div>
                 ) : (
-                  <Link
-                    to="/auth"
-                    className="block px-3 py-2 text-emerald-600 font-medium"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Sign In
-                  </Link>
+                  <div className="flex space-x-3">
+                    <Link
+                      to="/auth"
+                      className="flex-1 text-center bg-black text-white hover:bg-gray-800 px-4 py-2 rounded-full"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/auth"
+                      className="flex-1 text-center bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-2 rounded-full"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Sign up
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

@@ -10,7 +10,6 @@ import TourPackages from "@/components/TourPackages";
 import BookingForm from "@/components/BookingForm";
 import WhyChoose from "@/components/WhyChoose";
 import StatsSection from "@/components/StatsSection";
-import MissionSection from "@/components/MissionSection";
 import MountainTreks from "@/components/MountainTreks";
 import Footer from "@/components/Footer";
 import TripModal from "@/components/TripModal";
@@ -51,13 +50,13 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <TrendingDestinations onTripClick={handleTripClick} />
-      <UpcomingTrips onTripClick={handleTripClick} />
       <TourPackages onTripClick={handleTripClick} />
       <MountainTreks onTripClick={handleTripClick} />
-      <BookingForm />
       <WhyChoose />
       <StatsSection />
-      <MissionSection />
+      <div id="contact">
+        <BookingForm />
+      </div>
       <Footer />
       
       {selectedTrip && (
