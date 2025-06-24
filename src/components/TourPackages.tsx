@@ -105,6 +105,21 @@ const TourPackages = ({ onTripClick }) => {
           </Button>
         </div>
       </div>
+
+      {/* Background Image Section */}
+      <div 
+        className="w-full h-96 bg-cover bg-center bg-fixed mt-20"
+        style={{
+          backgroundImage: `url(https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80)`
+        }}
+      >
+        <div className="w-full h-full bg-black/40 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">Ready for Your Next Adventure?</h3>
+            <p className="text-lg md:text-xl opacity-90">Let us create unforgettable memories together</p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
