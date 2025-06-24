@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter } from "lucide-react";
+import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter, Crown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { TripModal } from "@/components/admin/TripModal";
+import SecretTripModal from "@/components/admin/SecretTripModal";
+import LiveBiddingFeed from "@/components/admin/LiveBiddingFeed";
 import { useTripsContext } from "@/contexts/TripsContext";
 import type { Database } from "@/integrations/supabase/types";
 import type { Trip } from "@/hooks/useTrips";
@@ -43,6 +44,18 @@ interface Booking {
   };
 }
 
+interface SecretTrip {
+  id: string;
+  title: string;
+  description: string;
+  max_guests: number;
+  available_seats: number;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -54,6 +67,8 @@ const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sectionFilter, setSectionFilter] = useState<string>("all");
+  const [secretTrips, setSecretTrips] = useState<SecretTrip[]>([]);
+  const [isSecretTripModalOpen, setIsSecretTripModalOpen] = useState(false);
 
   const { trips, loading: tripsLoading, createTrip, updateTrip, deleteTrip } = useTripsContext();
 
@@ -221,6 +236,78 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchSecretTrips = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('secret_trips')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching secret trips:', error);
+        return;
+      }
+
+      setSecretTrips(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleCreateSecretTrip = async (tripData: any) => {
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('secret_trips')
+        .insert([{
+          ...tripData,
+          created_by: user?.id
+        }]);
+
+      if (error) {
+        toast.error('Failed to create secret trip');
+        return;
+      }
+
+      toast.success('Secret trip created successfully');
+      setIsSecretTripModalOpen(false);
+      fetchSecretTrips();
+    } catch (error) {
+      toast.error('An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteSecretTrip = async (tripId: string) => {
+    if (!confirm("Are you sure you want to delete this secret trip?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('secret_trips')
+        .delete()
+        .eq('id', tripId);
+
+      if (error) {
+        toast.error('Failed to delete secret trip');
+        return;
+      }
+
+      toast.success('Secret trip deleted successfully');
+      fetchSecretTrips();
+    } catch (error) {
+      toast.error('An error occurred');
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchSecretTrips();
+    }
+  }, [isAdmin]);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -294,8 +381,9 @@ const AdminDashboard = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="trips" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="trips">Manage Trips</TabsTrigger>
+            <TabsTrigger value="secret-trips">Secret Trips</TabsTrigger>
             <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
@@ -404,6 +492,71 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="secret-trips">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Secret Trip Management */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Crown className="h-5 w-5 text-yellow-500" />
+                        Secret Location Trips
+                      </CardTitle>
+                      <CardDescription>
+                        Manage mystery adventure trips with live bidding
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      onClick={() => setIsSecretTripModalOpen(true)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Secret Trip
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {secretTrips.map((trip) => (
+                      <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <h3 className="font-semibold">{trip.title}</h3>
+                          <p className="text-sm text-gray-600">
+                            Max guests: {trip.max_guests} | Available: {trip.available_seats}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Ends: {new Date(trip.end_date).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={trip.is_active ? "default" : "secondary"}>
+                            {trip.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteSecretTrip(trip.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {secretTrips.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        No secret trips found. Create your first mystery adventure!
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Live Bidding Feed */}
+              <LiveBiddingFeed />
+            </div>
+          </TabsContent>
+
           <TabsContent value="bookings">
             <Card>
               <CardHeader>
@@ -502,6 +655,13 @@ const AdminDashboard = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleTripSubmit}
+        isLoading={isSubmitting}
+      />
+
+      <SecretTripModal
+        isOpen={isSecretTripModalOpen}
+        onClose={() => setIsSecretTripModalOpen(false)}
+        onSubmit={handleCreateSecretTrip}
         isLoading={isSubmitting}
       />
     </div>

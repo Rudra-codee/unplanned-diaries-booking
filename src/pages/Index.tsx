@@ -11,6 +11,7 @@ import BookingForm from "@/components/BookingForm";
 import WhyChoose from "@/components/WhyChoose";
 import StatsSection from "@/components/StatsSection";
 import MountainTreks from "@/components/MountainTreks";
+import SecretLocationTrip from "@/components/SecretLocationTrip";
 import Footer from "@/components/Footer";
 import TripModal from "@/components/TripModal";
 import BookingModal from "@/components/BookingModal";
@@ -52,6 +53,7 @@ const Index = () => {
       <TrendingDestinations onTripClick={handleTripClick} />
       <TourPackages onTripClick={handleTripClick} />
       <MountainTreks onTripClick={handleTripClick} />
+      <SecretLocationTrip />
       <WhyChoose />
       <StatsSection />
       <div id="contact">
