@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter, Crown } from "lucide-react";
+import { Users, MapPin, Calendar, DollarSign, Loader2, Plus, Edit, Trash2, Filter, Crown, Mail } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { TripModal } from "@/components/admin/TripModal";
 import SecretTripModal from "@/components/admin/SecretTripModal";
 import LiveBiddingFeed from "@/components/admin/LiveBiddingFeed";
+import SubscriberManagement from "@/components/admin/SubscriberManagement";
 import { useTripsContext } from "@/contexts/TripsContext";
 import type { Database } from "@/integrations/supabase/types";
 import type { Trip } from "@/hooks/useTrips";
@@ -381,9 +382,10 @@ const AdminDashboard = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="trips" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="trips">Manage Trips</TabsTrigger>
             <TabsTrigger value="secret-trips">Secret Trips</TabsTrigger>
+            <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
             <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
@@ -555,6 +557,23 @@ const AdminDashboard = () => {
               {/* Live Bidding Feed */}
               <LiveBiddingFeed />
             </div>
+          </TabsContent>
+
+          <TabsContent value="subscribers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Secret Trip Notifications
+                </CardTitle>
+                <CardDescription>
+                  Manage subscribers and send notifications about secret trips
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SubscriberManagement />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="bookings">

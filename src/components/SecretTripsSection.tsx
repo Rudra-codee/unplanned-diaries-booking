@@ -1,10 +1,49 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Clock, Users, MapPin } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const SecretTripsSection = () => {
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      const { error } = await supabase
+        .from('subscribers')
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast.error('You are already subscribed!');
+        } else {
+          toast.error('Failed to subscribe. Please try again.');
+        }
+        return;
+      }
+
+      toast.success('Successfully subscribed! You\'ll be notified when secret trips launch.');
+      setEmail('');
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,13 +97,24 @@ const SecretTripsSection = () => {
           <p className="text-purple-200 mb-6 text-lg">
             Be the first to know when our secret trips launch
           </p>
-          <Button 
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold px-8 py-3 rounded-full text-lg"
-            disabled
-          >
-            Notify Me When Available
-          </Button>
-          <p className="text-sm text-purple-300 mt-4">
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-4">
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-white/10 border-purple-500/30 text-white placeholder-purple-300 px-6 py-3 rounded-lg"
+              required
+            />
+            <Button 
+              type="submit"
+              disabled={isSubscribing}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold px-8 py-3 rounded-lg text-lg"
+            >
+              {isSubscribing ? 'Subscribing...' : 'Notify Me'}
+            </Button>
+          </form>
+          <p className="text-sm text-purple-300">
             Secret trips will feature live bidding and limited availability
           </p>
         </div>
