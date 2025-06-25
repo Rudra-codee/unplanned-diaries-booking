@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,7 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
     title: 'Secret Location Trip',
     description: 'Location unknown, fun guaranteed! Join our exclusive mystery adventure where the destination is a surprise until you arrive.',
     max_guests: 25,
-    start_date: '',
+    start_date: new Date().toISOString().split('T')[0], // Set default to today
     duration_hours: 48
   });
 
@@ -39,8 +39,14 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
       return;
     }
 
-    // Calculate end date
-    const endDate = new Date();
+    if (!formData.start_date) {
+      toast.error('Please select a start date');
+      return;
+    }
+
+    // Calculate end date based on start date and duration
+    const startDate = new Date(formData.start_date);
+    const endDate = new Date(startDate);
     endDate.setHours(endDate.getHours() + formData.duration_hours);
 
     try {
@@ -53,19 +59,20 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
           available_seats: formData.max_guests,
           start_date: formData.start_date,
           end_date: endDate.toISOString(),
-          created_by: user.id
+          created_by: user.id,
+          is_active: true
         }])
         .select()
         .single();
 
       if (error) {
         console.error('Error creating secret trip:', error);
-        toast.error('Failed to create secret trip');
+        toast.error('Failed to create secret trip: ' + error.message);
         return;
       }
 
       toast.success('Secret trip created successfully!');
-      onSubmit({ id: data.id });
+      onSubmit(data);
       onClose();
       
       // Reset form
@@ -73,7 +80,7 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
         title: 'Secret Location Trip',
         description: 'Location unknown, fun guaranteed! Join our exclusive mystery adventure where the destination is a surprise until you arrive.',
         max_guests: 25,
-        start_date: '',
+        start_date: new Date().toISOString().split('T')[0],
         duration_hours: 48
       });
     } catch (error) {
@@ -87,6 +94,9 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Create Secret Location Trip</DialogTitle>
+          <DialogDescription>
+            Create a mystery adventure trip that will be displayed on the website for bidding
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -129,6 +139,7 @@ const SecretTripModal: React.FC<SecretTripModalProps> = ({
               type="date"
               value={formData.start_date}
               onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+              min={new Date().toISOString().split('T')[0]}
               required
             />
           </div>
