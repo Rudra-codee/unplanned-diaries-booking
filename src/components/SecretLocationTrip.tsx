@@ -79,9 +79,14 @@ const SecretLocationTrip = () => {
   const fetchSecretTrip = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('get_active_secret_trip');
+        .from('secret_trips')
+        .select('*')
+        .eq('is_active', true)
+        .gt('end_date', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching secret trip:', error);
         return;
       }
@@ -99,7 +104,11 @@ const SecretLocationTrip = () => {
   const fetchBids = async (tripId: string) => {
     try {
       const { data, error } = await supabase
-        .rpc('get_trip_bids', { trip_id: tripId });
+        .from('bids')
+        .select('id, bid_amount, user_name, created_at')
+        .eq('secret_trip_id', tripId)
+        .order('bid_amount', { ascending: false })
+        .limit(3);
 
       if (error) {
         console.error('Error fetching bids:', error);
@@ -154,21 +163,26 @@ const SecretLocationTrip = () => {
         .single();
 
       const { error } = await supabase
-        .rpc('place_bid', {
-          trip_id: secretTrip!.id,
+        .from('bids')
+        .upsert({
+          secret_trip_id: secretTrip!.id,
           user_id: user.id,
           bid_amount: amount,
           user_name: profile?.full_name || 'Anonymous',
           user_email: profile?.email || user.email || ''
+        }, {
+          onConflict: 'secret_trip_id,user_id'
         });
 
       if (error) {
+        console.error('Error placing bid:', error);
         toast.error('Failed to place bid');
         return;
       }
 
       toast.success('Bid placed successfully!');
       setBidAmount('');
+      fetchBids(secretTrip!.id);
     } catch (error) {
       console.error('Error placing bid:', error);
       toast.error('An error occurred while placing bid');
@@ -263,7 +277,7 @@ const SecretLocationTrip = () => {
             <div>
               <p className="font-semibold mb-3">Last 3 bids:</p>
               <div className="space-y-2">
-                {bids.slice(0, 3).map((bid, index) => (
+                {bids.slice(0, 3).map((bid) => (
                   <div key={bid.id} className="flex justify-between items-center">
                     <span className="text-emerald-300">
                       {bid.user_name.replace(/(?<=.{4})./g, '*')}

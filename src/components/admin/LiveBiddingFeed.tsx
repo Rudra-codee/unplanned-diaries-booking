@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -66,7 +65,10 @@ const LiveBiddingFeed = () => {
   const fetchSecretTrips = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('get_all_secret_trips');
+        .from('secret_trips')
+        .select('id, title, end_date, max_guests, available_seats')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching secret trips:', error);
@@ -82,7 +84,9 @@ const LiveBiddingFeed = () => {
   const fetchBids = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('get_all_bids');
+        .from('bids')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching bids:', error);
