@@ -175,6 +175,36 @@ export type Database = {
         }
         Relationships: []
       }
+      queries: {
+        Row: {
+          check_in: string
+          check_out: string
+          created_at: string
+          destination: string
+          email: string
+          guests: string
+          id: string
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          created_at?: string
+          destination: string
+          email: string
+          guests: string
+          id?: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          created_at?: string
+          destination?: string
+          email?: string
+          guests?: string
+          id?: string
+        }
+        Relationships: []
+      }
       secret_trips: {
         Row: {
           available_seats: number
