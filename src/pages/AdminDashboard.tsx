@@ -6,11 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Users, DollarSign, Calendar, TrendingUp, Mail, MessageSquare } from "lucide-react";
 import { TripModal } from "@/components/admin/TripModal";
-import { SecretTripModal } from "@/components/admin/SecretTripModal";
-import { LiveBiddingFeed } from "@/components/admin/LiveBiddingFeed";
-import { SubscriberManagement } from "@/components/admin/SubscriberManagement";
+import SecretTripModal from "@/components/admin/SecretTripModal";
+import LiveBiddingFeed from "@/components/admin/LiveBiddingFeed";
+import SubscriberManagement from "@/components/admin/SubscriberManagement";
 import TripQueries from "@/components/admin/TripQueries";
 import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
 import { toast } from "sonner";
@@ -34,7 +35,7 @@ const AdminDashboard = () => {
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
   const [stats, setStats] = useState<BookingStats | null>(null);
   
-  const { trips, isLoading: tripsLoading, refetch } = useTripsWithRealtime();
+  const { trips, loading: tripsLoading, refetch } = useTripsWithRealtime();
 
   useEffect(() => {
     checkAdmin();
