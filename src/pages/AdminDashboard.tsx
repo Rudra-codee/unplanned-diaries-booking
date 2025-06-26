@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Users, DollarSign, Calendar, TrendingUp, Mail, MessageSquare, Settings, Bell, User, Search, Filter, Download } from "lucide-react";
+import { Plus, Users, DollarSign, Calendar, TrendingUp, Mail, MessageSquare, Settings, Bell, User, Search, Filter, Download, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TripModal } from "@/components/admin/TripModal";
@@ -16,6 +15,7 @@ import SecretTripModal from "@/components/admin/SecretTripModal";
 import LiveBiddingFeed from "@/components/admin/LiveBiddingFeed";
 import SubscriberManagement from "@/components/admin/SubscriberManagement";
 import TripQueries from "@/components/admin/TripQueries";
+import CustomTripPlanner from "@/components/admin/CustomTripPlanner";
 import { useTripsWithRealtime } from "@/hooks/useTripsWithRealtime";
 import { toast } from "sonner";
 import type { Trip } from "@/hooks/useTrips";
@@ -197,6 +197,15 @@ const AdminDashboard = () => {
                   }`}
                 >
                   Trips
+                </button>
+                <button 
+                  onClick={() => setActiveTab("custom-trips")}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    activeTab === "custom-trips" ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  <MapPin className="h-4 w-4 mr-1 inline" />
+                  Plan Custom Trip
                 </button>
                 <button 
                   onClick={() => setActiveTab("secret-trips")}
@@ -476,6 +485,12 @@ const AdminDashboard = () => {
                   </Table>
                 )}
               </div>
+            </div>
+          )}
+
+          {activeTab === "custom-trips" && (
+            <div className="p-6">
+              <CustomTripPlanner />
             </div>
           )}
 

@@ -148,6 +148,45 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_trip_requests: {
+        Row: {
+          contact_email: string | null
+          contact_number: string
+          created_at: string
+          end_date: string
+          id: string
+          location: string
+          number_of_guests: number
+          start_date: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_number: string
+          created_at?: string
+          end_date: string
+          id?: string
+          location: string
+          number_of_guests: number
+          start_date: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_number?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          location?: string
+          number_of_guests?: number
+          start_date?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -264,6 +303,47 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      trip_itineraries: {
+        Row: {
+          activities: Json | null
+          created_at: string
+          day_number: number
+          description: string | null
+          id: string
+          title: string
+          trip_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          activities?: Json | null
+          created_at?: string
+          day_number: number
+          description?: string | null
+          id?: string
+          title: string
+          trip_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activities?: Json | null
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          id?: string
+          title?: string
+          trip_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_itineraries_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trips: {
         Row: {
