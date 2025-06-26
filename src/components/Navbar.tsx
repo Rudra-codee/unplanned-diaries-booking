@@ -65,9 +65,9 @@ const Navbar = () => {
             <a href="#destinations" className="text-white hover:text-emerald-300 transition-colors">
               Destinations
             </a>
-            <a href="#group-trips" className="text-white hover:text-emerald-300 transition-colors">
+            <Link to="/group-trips" className="text-white hover:text-emerald-300 transition-colors">
               Group Trips
-            </a>
+            </Link>
             <a href="#packages" className="text-white hover:text-emerald-300 transition-colors">
               Tour Packages
             </a>
@@ -153,13 +153,13 @@ const Navbar = () => {
               >
                 Destinations
               </a>
-              <a
-                href="#group-trips"
+              <Link
+                to="/group-trips"
                 className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Group Trips
-              </a>
+              </Link>
               <a
                 href="#packages"
                 className="block px-3 py-2 text-white hover:text-emerald-300 transition-colors"

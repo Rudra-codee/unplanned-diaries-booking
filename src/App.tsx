@@ -8,6 +8,7 @@ import { TripsProvider } from "@/contexts/TripsContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
+import GroupTrips from "./pages/GroupTrips";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/group-trips" element={<GroupTrips />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
