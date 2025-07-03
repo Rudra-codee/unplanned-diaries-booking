@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, MapPin, Users, Calendar } from "lucide-react";
-import { useTrips } from "@/hooks/useTrips";
+import { useTripsContext } from "@/contexts/TripsContext";
 import { TripModal } from "./TripModal";
 import { toast } from "sonner";
 import type { Trip } from "@/hooks/useTrips";
 
 export default function TripManagement() {
-  const { trips, loading, createTrip, updateTrip, deleteTrip } = useTrips();
+  const { trips, loading, createTrip, updateTrip, deleteTrip } = useTripsContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
