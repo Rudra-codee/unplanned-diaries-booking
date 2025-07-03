@@ -187,6 +187,63 @@ export type Database = {
         }
         Relationships: []
       }
+      group_trips: {
+        Row: {
+          available_from: string | null
+          available_to: string | null
+          category: string
+          created_at: string
+          description: string | null
+          duration: number
+          features: Json | null
+          id: string
+          image_url: string | null
+          itinerary: Json | null
+          location: string
+          max_guests: number | null
+          price: number
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          available_from?: string | null
+          available_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration?: number
+          features?: Json | null
+          id?: string
+          image_url?: string | null
+          itinerary?: Json | null
+          location: string
+          max_guests?: number | null
+          price: number
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          available_from?: string | null
+          available_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration?: number
+          features?: Json | null
+          id?: string
+          image_url?: string | null
+          itinerary?: Json | null
+          location?: string
+          max_guests?: number | null
+          price?: number
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

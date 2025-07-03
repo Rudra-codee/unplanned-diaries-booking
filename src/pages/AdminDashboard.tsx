@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Users, TrendingUp, Calendar, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import TripManagement from "@/components/admin/TripManagement";
-import { CustomTripPlanner } from "@/components/admin/CustomTripPlanner";
+import CustomTripPlanner from "@/components/admin/CustomTripPlanner";
 import { GroupTripsManagement } from "@/components/admin/GroupTripsManagement";
 
 const AdminDashboard = () => {
