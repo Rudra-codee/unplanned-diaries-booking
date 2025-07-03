@@ -30,7 +30,7 @@ export const useGroupTrips = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('group_trips' as any)
+        .from('group_trips')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -54,7 +54,7 @@ export const useGroupTrips = () => {
       console.log('Creating group trip with data:', tripData);
       
       const { data, error } = await supabase
-        .from('group_trips' as any)
+        .from('group_trips')
         .insert([tripData])
         .select()
         .single();
@@ -82,7 +82,7 @@ export const useGroupTrips = () => {
       };
 
       const { data, error } = await supabase
-        .from('group_trips' as any)
+        .from('group_trips')
         .update(updateData)
         .eq('id', id)
         .select()
@@ -106,7 +106,7 @@ export const useGroupTrips = () => {
       console.log('Deleting group trip with ID:', id);
       
       const { error } = await supabase
-        .from('group_trips' as any)
+        .from('group_trips')
         .delete()
         .eq('id', id);
 
