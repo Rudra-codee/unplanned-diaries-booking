@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Users, MapPin, Calendar, DollarSign, TrendingUp, Settings } from "lucide-react";
 import TripManagement from "@/components/admin/TripManagement";
 import SecretTripsManagement from "@/components/admin/SecretTripsManagement";
-import GroupTripsManagement from "@/components/admin/GroupTripsManagement";
+import { GroupTripsManagement } from "@/components/admin/GroupTripsManagement";
 import SubscriberManagement from "@/components/admin/SubscriberManagement";
 import TripQueries from "@/components/admin/TripQueries";
 import CustomTripPlanner from "@/components/admin/CustomTripPlanner";
