@@ -5,10 +5,57 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, MapPin, Users, Calendar } from "lucide-react";
 import { useTrips } from "@/hooks/useTrips";
+import { TripModal } from "./TripModal";
 import { toast } from "sonner";
+import type { Trip } from "@/hooks/useTrips";
 
 export default function TripManagement() {
-  const { trips, loading } = useTrips();
+  const { trips, loading, createTrip, updateTrip, deleteTrip } = useTrips();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCreateTrip = () => {
+    setEditingTrip(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditTrip = (trip: Trip) => {
+    setEditingTrip(trip);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteTrip = async (tripId: string) => {
+    if (!confirm("Are you sure you want to delete this trip?")) return;
+    
+    try {
+      await deleteTrip(tripId);
+      toast.success("Trip deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting trip:", error);
+      toast.error("Failed to delete trip");
+    }
+  };
+
+  const handleSubmit = async (data: any) => {
+    setIsSubmitting(true);
+    try {
+      if (editingTrip) {
+        await updateTrip(editingTrip.id, data);
+        toast.success("Trip updated successfully!");
+      } else {
+        await createTrip(data);
+        toast.success("Trip created successfully!");
+      }
+      setIsModalOpen(false);
+      setEditingTrip(undefined);
+    } catch (error) {
+      console.error("Error saving trip:", error);
+      toast.error("Failed to save trip");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading trips...</div>;
@@ -19,9 +66,9 @@ export default function TripManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Trip Management</h2>
-          <p className="text-muted-foreground">Manage all trips and packages</p>
+          <p className="text-muted-foreground">Manage all trips and packages with real-time updates</p>
         </div>
-        <Button>
+        <Button onClick={handleCreateTrip}>
           <Plus className="h-4 w-4 mr-2" />
           Add Trip
         </Button>
@@ -39,6 +86,7 @@ export default function TripManagement() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => handleEditTrip(trip)}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -46,6 +94,7 @@ export default function TripManagement() {
                     variant="ghost"
                     size="sm"
                     className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDeleteTrip(trip.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -99,13 +148,24 @@ export default function TripManagement() {
         <Card className="text-center py-12">
           <CardContent>
             <p className="text-muted-foreground mb-4">No trips found</p>
-            <Button>
+            <Button onClick={handleCreateTrip}>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Trip
             </Button>
           </CardContent>
         </Card>
       )}
+
+      <TripModal
+        trip={editingTrip}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingTrip(undefined);
+        }}
+        onSubmit={handleSubmit}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 }
