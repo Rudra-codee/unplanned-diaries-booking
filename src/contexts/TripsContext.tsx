@@ -84,8 +84,6 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip created successfully:', data);
-      // Manually add the new trip to the local state for immediate UI update
-      setTrips(prev => [data, ...prev]);
       return data;
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -116,8 +114,6 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip updated successfully:', data);
-      // Manually update the trip in local state
-      setTrips(prev => prev.map(trip => trip.id === id ? data : trip));
       return data;
     } catch (error) {
       console.error('Error updating trip:', error);
@@ -140,8 +136,6 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       }
       
       console.log('Trip deleted successfully');
-      // Manually remove the trip from local state
-      setTrips(prev => prev.filter(trip => trip.id !== id));
     } catch (error) {
       console.error('Error deleting trip:', error);
       throw error;
@@ -151,10 +145,12 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
   useEffect(() => {
     fetchTrips();
 
-    // Set up real-time subscription with proper cleanup
+    // Set up real-time subscription with better error handling
     console.log('Setting up real-time subscription for trips');
+    
+    const channelName = `trips-realtime-${Date.now()}`;
     const channel = supabase
-      .channel('trips-realtime-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -167,7 +163,6 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
           
           if (payload.eventType === 'INSERT') {
             setTrips(prev => {
-              // Check if trip already exists to avoid duplicates
               const exists = prev.some(trip => trip.id === payload.new.id);
               if (!exists) {
                 return [payload.new as Trip, ...prev];
@@ -191,7 +186,7 @@ export const TripsProvider: React.FC<TripsProviderProps> = ({ children }) => {
       console.log('Cleaning up trips subscription');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array to prevent re-subscription
 
   const value: TripsContextType = {
     trips,
