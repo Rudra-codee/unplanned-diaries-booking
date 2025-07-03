@@ -26,6 +26,15 @@ export const useGroupTrips = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const transformGroupTripData = (data: any[]): GroupTrip[] => {
+    return data.map(trip => ({
+      ...trip,
+      features: Array.isArray(trip.features) ? trip.features : [],
+      itinerary: Array.isArray(trip.itinerary) ? trip.itinerary : [],
+      tags: Array.isArray(trip.tags) ? trip.tags : []
+    }));
+  };
+
   const fetchGroupTrips = async () => {
     try {
       setLoading(true);
@@ -38,7 +47,8 @@ export const useGroupTrips = () => {
         setError(error.message);
         console.error('Error fetching group trips:', error);
       } else {
-        setGroupTrips(data || []);
+        const transformedData = transformGroupTripData(data || []);
+        setGroupTrips(transformedData);
         setError(null);
       }
     } catch (err) {
@@ -139,10 +149,12 @@ export const useGroupTrips = () => {
           console.log('Real-time update:', payload);
           
           if (payload.eventType === 'INSERT') {
-            setGroupTrips(prev => [payload.new as GroupTrip, ...prev]);
+            const transformedTrip = transformGroupTripData([payload.new as any])[0];
+            setGroupTrips(prev => [transformedTrip, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
+            const transformedTrip = transformGroupTripData([payload.new as any])[0];
             setGroupTrips(prev => prev.map(trip => 
-              trip.id === payload.new.id ? payload.new as GroupTrip : trip
+              trip.id === transformedTrip.id ? transformedTrip : trip
             ));
           } else if (payload.eventType === 'DELETE') {
             setGroupTrips(prev => prev.filter(trip => trip.id !== payload.old.id));
