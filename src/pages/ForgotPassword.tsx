@@ -7,16 +7,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Mail, CheckCircle } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, CheckCircle, Clock } from "lucide-react";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const startCooldown = (seconds: number) => {
+    setIsRateLimited(true);
+    setCooldownTime(seconds);
+    
+    const timer = setInterval(() => {
+      setCooldownTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsRateLimited(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const extractWaitTime = (errorMessage: string): number => {
+    const match = errorMessage.match(/(\d+)\s+seconds?/);
+    return match ? parseInt(match[1]) : 30;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +55,11 @@ const ForgotPassword = () => {
       return;
     }
 
+    if (isRateLimited) {
+      toast.error(`Please wait ${cooldownTime} seconds before trying again`);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -43,7 +71,18 @@ const ForgotPassword = () => {
 
       if (error) {
         console.error("Password reset error:", error);
-        toast.error("An error occurred. Please try again later.");
+        
+        // Handle rate limiting specifically
+        if (error.message.includes("For security purposes") && error.message.includes("seconds")) {
+          const waitTime = extractWaitTime(error.message);
+          startCooldown(waitTime);
+          toast.error(`Too many requests. Please wait ${waitTime} seconds before trying again.`);
+        } else if (error.message.includes("rate")) {
+          toast.error("Too many password reset requests. Please try again in a few minutes.");
+          startCooldown(60); // Default 1 minute cooldown
+        } else {
+          toast.error("An error occurred. Please try again later.");
+        }
       } else {
         setEmailSent(true);
         toast.success("If this email is registered, a reset link has been sent.");
@@ -73,16 +112,17 @@ const ForgotPassword = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center text-sm text-gray-500">
-              <p>Didn't receive the email? Check your spam folder or</p>
+              <p>Didn't receive the email? Check your spam folder or wait a few minutes before trying again.</p>
               <Button
                 variant="link"
-                className="p-0 h-auto text-emerald-600 hover:text-emerald-700"
+                className="p-0 h-auto text-emerald-600 hover:text-emerald-700 mt-2"
+                disabled={isRateLimited}
                 onClick={() => {
                   setEmailSent(false);
                   setEmail("");
                 }}
               >
-                try again
+                {isRateLimited ? `Try again in ${cooldownTime}s` : "Try again"}
               </Button>
             </div>
             
@@ -140,14 +180,23 @@ const ForgotPassword = () => {
                 />
               </div>
             </div>
+
+            {isRateLimited && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <Clock className="h-4 w-4 text-amber-600" />
+                <span className="text-sm text-amber-700">
+                  Please wait {cooldownTime} seconds before trying again
+                </span>
+              </div>
+            )}
             
             <Button 
               type="submit" 
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors" 
-              disabled={loading}
+              disabled={loading || isRateLimited}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Reset Link
+              {isRateLimited ? `Wait ${cooldownTime}s` : "Send Reset Link"}
             </Button>
             
             <div className="text-center">
