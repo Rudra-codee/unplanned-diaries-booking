@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -287,13 +286,12 @@ const Auth = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotPassword(true)}
+                  <Link
+                    to="/forgot-password"
                     className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                   >
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
                 <Button 
                   type="submit" 

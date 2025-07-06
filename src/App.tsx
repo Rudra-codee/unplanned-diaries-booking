@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TripsProvider } from "@/contexts/TripsContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import GroupTrips from "./pages/GroupTrips";
 import NotFound from "./pages/NotFound";
@@ -23,6 +25,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/group-trips" element={<GroupTrips />} />
               <Route path="*" element={<NotFound />} />
