@@ -41,31 +41,48 @@ const ResetPassword = () => {
   };
 
   useEffect(() => {
-    // Check if we have the required parameters for password reset
-    // Supabase sends tokens as URL fragments (after #), not query params
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-    const type = hashParams.get('type');
+    const initializePasswordReset = async () => {
+      try {
+        // Check if we have the required parameters for password reset
+        // Supabase sends tokens as URL fragments (after #), not query params
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
 
-    if (type === 'recovery' && accessToken && refreshToken) {
-      // Set the session with the tokens from the URL
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Error setting session:', error);
-          setIsValidToken(false);
-          toast.error('Invalid or expired reset link');
+        console.log('Reset password tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+
+        if (type === 'recovery' && accessToken && refreshToken) {
+          // Set the session with the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Error setting session:', error);
+            setIsValidToken(false);
+            toast.error('Invalid or expired reset link. Please request a new one.');
+          } else if (data.session) {
+            setIsValidToken(true);
+            toast.success('Reset link verified! You can now set your new password.');
+          } else {
+            setIsValidToken(false);
+            toast.error('Unable to verify reset link. Please try again.');
+          }
         } else {
-          setIsValidToken(true);
+          console.error('Missing required parameters:', { type, accessToken: !!accessToken, refreshToken: !!refreshToken });
+          setIsValidToken(false);
+          toast.error('Invalid reset link format. Please check your email for the correct link.');
         }
-      });
-    } else {
-      setIsValidToken(false);
-      toast.error('Invalid reset link');
-    }
+      } catch (error) {
+        console.error('Error initializing password reset:', error);
+        setIsValidToken(false);
+        toast.error('An error occurred while processing the reset link.');
+      }
+    };
+
+    initializePasswordReset();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
