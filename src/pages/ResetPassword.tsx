@@ -43,35 +43,63 @@ const ResetPassword = () => {
   useEffect(() => {
     const initializePasswordReset = async () => {
       try {
+        // Get the full URL and log it for debugging
+        const currentUrl = window.location.href;
+        console.log('Current URL:', currentUrl);
+        
         // Check if we have the required parameters for password reset
         // Supabase sends tokens as URL fragments (after #), not query params
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const hash = window.location.hash;
+        console.log('Hash:', hash);
+        
+        if (!hash || hash.length <= 1) {
+          console.error('No hash found in URL');
+          setIsValidToken(false);
+          toast.error('Invalid reset link format. Please check your email for the correct link.');
+          return;
+        }
+        
+        const hashParams = new URLSearchParams(hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        console.log('Reset password tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+        console.log('Reset password tokens:', { 
+          accessToken: accessToken ? `${accessToken.substring(0, 20)}...` : null, 
+          refreshToken: refreshToken ? `${refreshToken.substring(0, 10)}...` : null, 
+          type 
+        });
 
         if (type === 'recovery' && accessToken && refreshToken) {
+          console.log('Attempting to set session with tokens...');
+          
           // Set the session with the tokens from the URL
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
 
+          console.log('Session result:', { data: !!data?.session, error: error?.message });
+
           if (error) {
             console.error('Error setting session:', error);
             setIsValidToken(false);
             toast.error('Invalid or expired reset link. Please request a new one.');
           } else if (data.session) {
+            console.log('Session set successfully');
             setIsValidToken(true);
             toast.success('Reset link verified! You can now set your new password.');
           } else {
+            console.log('No session returned');
             setIsValidToken(false);
             toast.error('Unable to verify reset link. Please try again.');
           }
         } else {
-          console.error('Missing required parameters:', { type, accessToken: !!accessToken, refreshToken: !!refreshToken });
+          console.error('Missing required parameters:', { 
+            type, 
+            hasAccessToken: !!accessToken, 
+            hasRefreshToken: !!refreshToken 
+          });
           setIsValidToken(false);
           toast.error('Invalid reset link format. Please check your email for the correct link.');
         }
