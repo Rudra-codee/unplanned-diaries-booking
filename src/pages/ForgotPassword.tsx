@@ -63,7 +63,13 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      // Use production URL for password reset redirect
+      const isProduction = window.location.hostname !== 'localhost';
+      const redirectUrl = isProduction 
+        ? 'https://unplanned-diaries-booking.vercel.app/reset-password'
+        : `${window.location.origin}/reset-password`;
+      
+      console.log('Sending reset email with redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl
