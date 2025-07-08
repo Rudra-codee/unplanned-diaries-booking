@@ -42,9 +42,11 @@ const ResetPassword = () => {
 
   useEffect(() => {
     // Check if we have the required parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    // Supabase sends tokens as URL fragments (after #), not query params
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
 
     if (type === 'recovery' && accessToken && refreshToken) {
       // Set the session with the tokens from the URL
@@ -64,7 +66,7 @@ const ResetPassword = () => {
       setIsValidToken(false);
       toast.error('Invalid reset link');
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
